@@ -1,6 +1,6 @@
 import json
 import os
-import requests
+import base64
 
 from api_client import APIClient
 
@@ -16,26 +16,31 @@ def create_shipment(file_path, key_id, api_key):
     }
 
     client = APIClient(headers=headers)
-    rates = client.get_rates(shipment_data)
-    print('Rates:', rates)
+    response = client.get_rates(shipment_data)
+    rates = response['rates']
 
     # Выбор самого дешевого сервиса
     cheapest_rate = min(rates, key=lambda x: x['totalPrice'])
-    shipment_data['serviceId'] = cheapest_rate['serviceId']
+    shipment_data['provider'] = cheapest_rate['provider']
+    shipment_data['serviceCode'] = cheapest_rate['serviceCode']
+    shipment_data['options'] = cheapest_rate['options']
+    shipment_data['getLabel'] = True
+    shipment_data['reference'] = "GV000001TEST"
+    shipment_data['labelSize'] = "4x6"
 
     # Создание отправки
     shipment = client.create_shipment(shipment_data)
-    print('Shipment:', shipment)
-
-    # Сохранение PDF
     tracking_number = shipment['trackingNumber']
-    label_url = shipment['labelUrl']
 
-    label_response = requests.get(label_url)
-    label_path = os.path.join(os.path.dirname(file_path), f'{tracking_number}.pdf')
-    with open(label_path, 'wb') as f:
-        f.write(label_response.content)
-
+    # Сохранение запроса/ответа
+    log_file = {'Request data': shipment_data, 'Response data': shipment}
     log_path = os.path.join(os.path.dirname(file_path), f'{tracking_number}.log')
     with open(log_path, 'w') as f:
-        json.dump(shipment, f, indent=4)
+        json.dump(log_file, f, indent=4)
+
+    # Сохранение PDF
+    label_path = os.path.join(os.path.dirname(file_path), f'{tracking_number}.pdf')
+    label = shipment['label']
+    pdf_data = base64.b64decode(label)
+    with open(label_path, 'wb') as f:
+       f.write(pdf_data)
