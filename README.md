@@ -7,6 +7,7 @@
 python -m venv venv
 source venv/bin/activate (Для Windows: venv\Scripts\activate)
 pip install -r requirements.txt
+Для запуска из терминала - python main.py create_shipment -f file_folder/test_machool_order_data.json -keyid bCahFZHQc3 -apikey 645744e8-a047-421a-b882-7d2471f6bab5
 ```
 
 
