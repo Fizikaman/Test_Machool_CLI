@@ -4,3 +4,5 @@ HEADERS = {
     'x-api-key': '645744e8-a047-421a-b882-7d2471f6bab5',
     'Content-Type': 'application/json'
 }
+RATES = '/external/api/v1/rates'
+SHIPMENTS = '/external/api/v1/shipments'
